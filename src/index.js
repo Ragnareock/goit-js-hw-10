@@ -5,15 +5,16 @@ import 'slim-select/dist/slimselect.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const selectedEl = document.querySelector('.breed-select');
+const optionEl = document.querySelector('.breed-select option');
 const loaderEl = document.querySelector('.loader');
 const infoEl = document.querySelector('.cat-info');
-const optionEl = document.querySelector('.breed-select option');
 
 selectedEl.classList.add('hidden');
+selectedEl.setAttribute('id', 'slim-select');
 optionEl.setAttribute('selected', 'selected');
 optionEl.setAttribute('disabled', 'disabled');
 optionEl.textContent = 'Make your choice';
-selectedEl.setAttribute('id', 'slim-select');
+
 selectedEl.addEventListener('change', onSelect);
 
 function onSelect(event) {
@@ -49,19 +50,19 @@ fetchBreeds()
 
 function createOptionsMarkup(arr) {
   return arr.forEach(({ name, id }) => {
-    let markUp = `<option value="${id}">${name}</option>`;
-    selectedEl.insertAdjacentHTML('beforeend', markUp);
+    let optionsMarkup = `<option value="${id}">${name}</option>`;
+    selectedEl.insertAdjacentHTML('beforeend', optionsMarkup);
   });
 }
 
 function createCardMarkup({ name, description, temperament }, { url }) {
-  let markUp = `
+  let cardMarkup = `
     <img src="${url}" alt="${name}" width="480px"/>
     <div>
     <h1>${name}</h1>
     <p>${description}</p>
-    <p><span>Temperament: </span>${temperament}</p>
+    <p><span>Temperament: </span>${temperament}.</p>
     </div>`;
 
-  infoEl.innerHTML = markUp;
+  infoEl.innerHTML = cardMarkup;
 }
