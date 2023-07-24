@@ -1,49 +1,67 @@
-import { fetchBreeds, fetchCatByBreed } from './cat-api';
+import { fetchBreeds, fetchCatByBreed } from './js/cat-api';
+import './css/styles.css';
 import SlimSelect from 'slim-select';
 import 'slim-select/dist/slimselect.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
-const breedSelect = document.querySelector('.breed-select');
-const loader = document.querySelector('.loader');
-const error = document.querySelector('.error');
-const catInfo = document.querySelector('.cat-info');
+const selectedEl = document.querySelector('.breed-select');
+const loaderEl = document.querySelector('.loader');
+const infoEl = document.querySelector('.cat-info');
+const optionEl = document.querySelector('.breed-select option');
 
-breedSelect.addEventListener('change', onBreedSelect);
-breedSelect.setAttribute('id', 'slim-select');
+selectedEl.classList.add('hidden');
+optionEl.setAttribute('selected', 'selected');
+optionEl.setAttribute('disabled', 'disabled');
+optionEl.textContent = 'Make your choice';
+selectedEl.setAttribute('id', 'slim-select');
+selectedEl.addEventListener('change', onSelect);
 
-function onBreedSelect(e) {
-  fetchCatByBreed(e.target.value)
+function onSelect(event) {
+  loaderEl.classList.remove('hidden');
+  infoEl.innerHTML = '';
+
+  fetchCatByBreed(event.target.value)
     .then(response => {
-      console.log(response.data[0]);
-      makeMarkCard(response.data[0].breeds[0], response.data[0]);
+      createCardMarkup(response.data[0].breeds[0], response.data[0]);
+      loaderEl.classList.add('hidden');
     })
-    .catch(error => {})
+    .catch(error => {
+      Notify.failure('Oops! Something went wrong! Try reloading the page!');
+      loaderEl.classList.add('hidden');
+    })
     .finally();
 }
 
 fetchBreeds()
   .then(response => {
-    makeMarkOptions(response.data);
+    createOptionsMarkup(response.data);
     new SlimSelect({
       select: '#slim-select',
     });
+    selectedEl.classList.remove('hidden');
+    loaderEl.classList.add('hidden');
   })
-  .catch(error => {})
+  .catch(error => {
+    Notify.failure('Oops! Something went wrong! Try reloading the page!');
+    loaderEl.classList.add('hidden');
+  })
   .finally();
 
-function makeMarkOptions(arr) {
+function createOptionsMarkup(arr) {
   return arr.forEach(({ name, id }) => {
     let markUp = `<option value="${id}">${name}</option>`;
-      breedSelect.insertAdjacentHTML('beforeend', markUp);
+    selectedEl.insertAdjacentHTML('beforeend', markUp);
   });
 }
 
-function makeMarkCard({ name, description, temperament }, { url }) {
+function createCardMarkup({ name, description, temperament }, { url }) {
   let markUp = `
-    <img src="${url}" alt="${name}" width="460px"/>
-    <div class="descrp-card">
-    <p class="title-card">${name}</p>
-    <p class="description">${description}</p>
-    <p class="temerament">${temperament}</p>
+    <img src="${url}" alt="${name}" width="480px"/>
+    <div>
+    <h1>${name}</h1>
+    <p>${description}</p>
+    <p><span>Temperament: </span>${temperament}</p>
     </div>`;
-    catInfo.innerHTML = markUp;
+
+  infoEl.innerHTML = markUp;
 }
